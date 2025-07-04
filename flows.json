@@ -64,7 +64,7 @@
         "type": "function",
         "z": "1a7f794a0d4294ac",
         "name": "apower ggf umkehren",
-        "func": "// Array mit Measurements, bei denen apower umgekehrt werden soll\nconst targetMeasurements = [\"BK-Tiny-Kati\", \"Ein weiteres Measurement\", \"Plug-2\"]; \n\n// Sicherstellen, dass msg.payload ein Array ist\nif (!Array.isArray(msg.payload)) {\n    return null; // Abbrechen, wenn payload kein Array ist\n}\n\n// Daten verarbeiten\nmsg.payload = msg.payload.map(item => {\n    // Überprüfen, ob das Measurement im Array ist\n    if (targetMeasurements.includes(item.measurement)) {\n        // apower umkehren, falls vorhanden\n        if (item.fields.apower !== undefined) {\n            item.fields.apower = -item.fields.apower;\n        }\n    }\n    return item; // Bearbeitetes oder unverändertes Item zurückgeben\n});\n\nreturn msg;\n",
+        "func": "// Array mit Measurements, bei denen apower umgekehrt werden soll\nconst targetMeasurements = [\"Balkonkraftwerk\", \"Ein weiteres Measurement\", \"Plug-2\"]; \n\n// Sicherstellen, dass msg.payload ein Array ist\nif (!Array.isArray(msg.payload)) {\n    return null; // Abbrechen, wenn payload kein Array ist\n}\n\n// Daten verarbeiten\nmsg.payload = msg.payload.map(item => {\n    // Überprüfen, ob das Measurement im Array ist\n    if (targetMeasurements.includes(item.measurement)) {\n        // apower umkehren, falls vorhanden\n        if (item.fields.apower !== undefined) {\n            item.fields.apower = -item.fields.apower;\n        }\n    }\n    return item; // Bearbeitetes oder unverändertes Item zurückgeben\n});\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
