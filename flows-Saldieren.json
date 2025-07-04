@@ -1,0 +1,843 @@
+[
+    {
+        "id": "1",
+        "type": "inject",
+        "z": "eab31726a59d0393",
+        "name": "Start Query",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "300",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 60,
+        "wires": [
+            [
+                "e9a18d715d104f2e"
+            ]
+        ]
+    },
+    {
+        "id": "3",
+        "type": "function",
+        "z": "eab31726a59d0393",
+        "name": "bezug und zu influx",
+        "func": "let influxResult = msg.payload;\n\nif (Array.isArray(influxResult) && influxResult.length > 0) {\n    // Extrahiere die Arbeit in Wattstunden\n    let energyWh = influxResult[0]._value;\n\n    // Umwandlung in Kilowattstunden\n    let energyKWh = energyWh / 1000;\n\n    // Daten für den InfluxDB-Out-Node vorbereiten\n    msg.payload = [\n        {\n            measurement: \"tagesenergie-Bezug\",\n            fields: { energie: energyKWh },\n            tags: { device: \"shellypro3em-EsMi_1\" }\n        }\n    ];\n\n    return msg;\n} else {\n    // Setze die Ausgabe auf 0, falls keine Daten gefunden wurden\n    msg.payload = [\n        {\n            measurement: \"tagesenergie-Bezug\",\n            fields: { energie: 0 },\n            tags: { device: \"shellypro3em-EsMi_1\" }\n        }\n    ];\n\n    return msg;\n}\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 810,
+        "y": 60,
+        "wires": [
+            [
+                "4",
+                "d5f638771cd2ceef"
+            ]
+        ]
+    },
+    {
+        "id": "4",
+        "type": "debug",
+        "z": "eab31726a59d0393",
+        "name": "Resultat",
+        "active": false,
+        "console": "true",
+        "complete": "true",
+        "x": 1150,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "2ac44d9180b9ecbd",
+        "type": "debug",
+        "z": "eab31726a59d0393",
+        "name": "debug 12",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 620,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "e92af15caa791b56",
+        "type": "function",
+        "z": "eab31726a59d0393",
+        "name": "Einspeisung und zu influx",
+        "func": "let influxResult = msg.payload;\n\nif (Array.isArray(influxResult) && influxResult.length > 0) {\n    // Extrahiere die Arbeit in Wattstunden und kehre das Vorzeichen um\n    let energyWh = Math.abs(influxResult[0]._value);\n\n    // Umwandlung in Kilowattstunden\n    let energyKWh = energyWh / 1000;\n\n    // Daten für den InfluxDB-Out-Node vorbereiten\n    msg.payload = [\n        {\n            measurement: \"tagesenergie-Einspeisung\",\n            fields: { energie: energyKWh },\n            tags: { device: \"shellypro3em-EsMi_1\" }\n        }\n    ];\n\n    return msg;\n} else {\n    // Setze die Ausgabe auf 0, falls keine Daten gefunden wurden\n    msg.payload = [\n        {\n            measurement: \"tagesenergie-Einspeisung\",\n            fields: { energie: 0 },\n            tags: { device: \"shellypro3em-EsMi_1\" }\n        }\n    ];\n\n    return msg;\n}\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 830,
+        "y": 140,
+        "wires": [
+            [
+                "d5f638771cd2ceef",
+                "4"
+            ]
+        ]
+    },
+    {
+        "id": "d675f0e6f0d5a483",
+        "type": "function",
+        "z": "eab31726a59d0393",
+        "name": "Berechne Leistung",
+        "func": "let influxResult = msg.payload;\n\nif (Array.isArray(influxResult) && influxResult.length > 0) {\n    // Extrahiere die Arbeit in Wattstunden und kehre das Vorzeichen um\n    let energyWh = Math.abs(influxResult[0]._value);\n\n    // Umwandlung in Kilowattstunden\n    let energyKWh = energyWh / 1000;\n\n    // Daten für den InfluxDB-Out-Node vorbereiten\n    msg.payload = [\n        {\n            measurement: \"tagesenergie-Einspeisung-Gestern\",\n            fields: { energie: energyKWh },\n            tags: { device: \"shellypro3em-EsMi_1\" }\n        }\n    ];\n\n    return msg;\n} else {\n    msg.payload = [\n        {\n            measurement: \"tagesenergie-Einspeisung-Gestern\",\n            fields: { energie: 0 },\n            tags: { device: \"shellypro3em-EsMi_1\" }\n        }\n    ];\n\n    return msg;\n}\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 850,
+        "y": 240,
+        "wires": [
+            [
+                "2ccf02d86023aea2",
+                "2e204cbf314b1fc1"
+            ]
+        ]
+    },
+    {
+        "id": "2ccf02d86023aea2",
+        "type": "debug",
+        "z": "eab31726a59d0393",
+        "name": "Resultat",
+        "active": false,
+        "tosidebar": true,
+        "console": true,
+        "complete": "true",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1190,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "1a6c801ac4540006",
+        "type": "inject",
+        "z": "eab31726a59d0393",
+        "name": "Start Query",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "3600",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 240,
+        "wires": [
+            [
+                "a1dd7e3a02116b22"
+            ]
+        ]
+    },
+    {
+        "id": "a1dd7e3a02116b22",
+        "type": "function",
+        "z": "eab31726a59d0393",
+        "name": "Funktion erzeugen",
+        "func": "// Heute Mitternacht berechnen\nlet now = new Date();\nlet todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());\n\n// Gestern Mitternacht berechnen\nlet yesterdayMidnight = new Date(todayMidnight.getTime() - 24 * 60 * 60 * 1000);\n\n// Konvertiere die Zeitstempel in RFC3339-Format (ohne JSON.stringify)\nlet start = yesterdayMidnight.toISOString();\nlet stop = todayMidnight.toISOString();\n\n// Erstelle die Flux Query\nmsg.query = `\nfrom(bucket: \"5years\")\n  |> range(start: ${start}, stop: ${stop})\n  |> filter(fn: (r) => r[\"_measurement\"] == \"shellypro3em-EsMi\")\n  |> filter(fn: (r) => r[\"_field\"] == \"sum_act_power_esmi_Neg\")\n  |> filter(fn: (r) => r._value < 0) // Nur negative Werte\n  |> group(columns: [\"_measurement\", \"_field\"]) // Gruppiert über Schlüssel-Tags\n  |> integral(unit: 1h) // Integration in Wattstunden\n`;\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 240,
+        "wires": [
+            [
+                "15270e22b73ab1b3",
+                "036b6a1a980dedeb"
+            ]
+        ]
+    },
+    {
+        "id": "036b6a1a980dedeb",
+        "type": "debug",
+        "z": "eab31726a59d0393",
+        "name": "Resultat",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "query",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 540,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "7c5a5bb1405956eb",
+        "type": "debug",
+        "z": "eab31726a59d0393",
+        "name": "debug 13",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 840,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "422f558d415746fc",
+        "type": "function",
+        "z": "eab31726a59d0393",
+        "name": "Berechne Leistung",
+        "func": "let influxResult = msg.payload;\n\nif (Array.isArray(influxResult) && influxResult.length > 0) {\n    // Extrahiere die Arbeit in Wattstunden und kehre das Vorzeichen um\n    let energyWh = Math.abs(influxResult[0]._value);\n\n    // Umwandlung in Kilowattstunden\n    let energyKWh = energyWh / 1000;\n\n    // Daten für den InfluxDB-Out-Node vorbereiten\n    msg.payload = [\n        {\n            measurement: \"tagesenergie-Bezug-Gestern\",\n            fields: { energie: energyKWh },\n            tags: { device: \"shellypro3em-EsMi_1\" }\n        }\n    ];\n\n    return msg;\n} else {\n    msg.payload = [\n        {\n            measurement: \"tagesenergie-Bezug-Gestern\",\n            fields: { energie: 0 },\n            tags: { device: \"shellypro3em-EsMi_1\" }\n        }\n    ];\n    return msg;\n}\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 850,
+        "y": 320,
+        "wires": [
+            [
+                "2e204cbf314b1fc1",
+                "2ccf02d86023aea2"
+            ]
+        ]
+    },
+    {
+        "id": "cb372be8101b48b8",
+        "type": "function",
+        "z": "eab31726a59d0393",
+        "name": "Funktion erzeugen",
+        "func": "// Heute Mitternacht berechnen\nlet now = new Date();\nlet todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());\n\n// Gestern Mitternacht berechnen\nlet yesterdayMidnight = new Date(todayMidnight.getTime() - 24 * 60 * 60 * 1000);\n\n// Konvertiere die Zeitstempel in RFC3339-Format (ohne JSON.stringify)\nlet start = yesterdayMidnight.toISOString();\nlet stop = todayMidnight.toISOString();\n\n// Erstelle die Flux Query\nmsg.query = `\nfrom(bucket: \"5years\")\n  |> range(start: ${start}, stop: ${stop})\n  |> filter(fn: (r) => r[\"_measurement\"] == \"shellypro3em-EsMi\")\n  |> filter(fn: (r) => r[\"_field\"] == \"sum_act_power_esmi_Pos\")\n  |> filter(fn: (r) => r._value > 0) // Nur positive Werte\n  |> group(columns: [\"_measurement\", \"_field\"]) // Gruppiert über Schlüssel-Tags\n  |> integral(unit: 1h) // Integration in Wattstunden\n`;\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 320,
+        "wires": [
+            [
+                "9ac2b64b1138ac85",
+                "036b6a1a980dedeb"
+            ]
+        ]
+    },
+    {
+        "id": "eb129ab87e7dea0e",
+        "type": "function",
+        "z": "eab31726a59d0393",
+        "name": "Berechne Leistung",
+        "func": "let influxResult = msg.payload;\n\nif (Array.isArray(influxResult) && influxResult.length > 0) {\n    // Extrahiere die Arbeit in Wattstunden und kehre das Vorzeichen um\n    let energyWh = Math.abs(influxResult[0]._value);\n\n    // Umwandlung in Kilowattstunden\n    let energyKWh = energyWh / 1000;\n\n    // Daten für den InfluxDB-Out-Node vorbereiten\n    msg.payload = [\n        {\n            measurement: \"tagesenergie-Einspeisung-l7d\",\n            fields: { energie: energyKWh },\n            tags: { device: \"shellypro3em-EsMi_1\" }\n        }\n    ];\n\n    return msg;\n} else {\n    msg.payload = [\n        {\n            measurement: \"tagesenergie-Einspeisung-l7d\",\n            fields: { energie: 0 },\n            tags: { device: \"shellypro3em-EsMi_1\" }\n        }\n    ];\n\n    return msg;\n}\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 850,
+        "y": 400,
+        "wires": [
+            [
+                "fa030e61517ac421",
+                "706374f0fc2c8b8a"
+            ]
+        ]
+    },
+    {
+        "id": "fa030e61517ac421",
+        "type": "debug",
+        "z": "eab31726a59d0393",
+        "name": "Resultat",
+        "active": false,
+        "console": "true",
+        "complete": "true",
+        "x": 1150,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "74d932d71fb380c5",
+        "type": "inject",
+        "z": "eab31726a59d0393",
+        "name": "Start Query",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "3600",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 400,
+        "wires": [
+            [
+                "ded66ea8530afafd"
+            ]
+        ]
+    },
+    {
+        "id": "ded66ea8530afafd",
+        "type": "function",
+        "z": "eab31726a59d0393",
+        "name": "Funktion erzeugen",
+        "func": "// Heute Mitternacht berechnen\nlet now = new Date();\nlet todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());\n\n// Gestern Mitternacht berechnen\nlet yesterdayMidnight = new Date(todayMidnight.getTime() - 24 * 60 * 60 * 1000 * 7);\n\n// Konvertiere die Zeitstempel in RFC3339-Format (ohne JSON.stringify)\nlet start = yesterdayMidnight.toISOString();\nlet stop = todayMidnight.toISOString();\n\n// Erstelle die Flux Query\nmsg.query = `\nfrom(bucket: \"5years\")\n  |> range(start: ${start}, stop: ${stop})\n  |> filter(fn: (r) => r[\"_measurement\"] == \"shellypro3em-EsMi\")\n  |> filter(fn: (r) => r[\"_field\"] == \"sum_act_power_esmi_Neg\")\n  |> filter(fn: (r) => r._value < 0) // Nur negative Werte\n  |> group(columns: [\"_measurement\", \"_field\"]) // Gruppiert über Schlüssel-Tags\n  |> integral(unit: 1h) // Integration in Wattstunden\n`;\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 400,
+        "wires": [
+            [
+                "6e8b2ad63ffdef16",
+                "d51a843884b153a1"
+            ]
+        ]
+    },
+    {
+        "id": "d51a843884b153a1",
+        "type": "debug",
+        "z": "eab31726a59d0393",
+        "name": "Resultat",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "query",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 540,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "44d567df3f1671e9",
+        "type": "debug",
+        "z": "eab31726a59d0393",
+        "name": "debug 17",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 820,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "e1a05dcd90269163",
+        "type": "function",
+        "z": "eab31726a59d0393",
+        "name": "Berechne Leistung",
+        "func": "let influxResult = msg.payload;\n\nif (Array.isArray(influxResult) && influxResult.length > 0) {\n    // Extrahiere die Arbeit in Wattstunden und kehre das Vorzeichen um\n    let energyWh = Math.abs(influxResult[0]._value);\n\n    // Umwandlung in Kilowattstunden\n    let energyKWh = energyWh / 1000;\n\n    // Daten für den InfluxDB-Out-Node vorbereiten\n    msg.payload = [\n        {\n            measurement: \"tagesenergie-Bezug-l7d\",\n            fields: { energie: energyKWh },\n            tags: { device: \"shellypro3em-EsMi_1\" }\n        }\n    ];\n\n    return msg;\n} else {\n    msg.payload = [\n        {\n            measurement: \"tagesenergie-Bezug-l7d\",\n            fields: { energie: 0 },\n            tags: { device: \"shellypro3em-EsMi_1\" }\n        }\n    ];\n\n    return msg;\n}\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 850,
+        "y": 480,
+        "wires": [
+            [
+                "706374f0fc2c8b8a",
+                "fa030e61517ac421"
+            ]
+        ]
+    },
+    {
+        "id": "0da97fa00170bf60",
+        "type": "function",
+        "z": "eab31726a59d0393",
+        "name": "Funktion erzeugen",
+        "func": "// Heute Mitternacht berechnen\nlet now = new Date();\nlet todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());\n\n// Gestern Mitternacht berechnen\nlet yesterdayMidnight = new Date(todayMidnight.getTime() - 24 * 60 * 60 * 1000 * 7);\n\n// Konvertiere die Zeitstempel in RFC3339-Format (ohne JSON.stringify)\nlet start = yesterdayMidnight.toISOString();\nlet stop = todayMidnight.toISOString();\n\n// Erstelle die Flux Query\nmsg.query = `\nfrom(bucket: \"5years\")\n  |> range(start: ${start}, stop: ${stop})\n  |> filter(fn: (r) => r[\"_measurement\"] == \"shellypro3em-EsMi\")\n  |> filter(fn: (r) => r[\"_field\"] == \"sum_act_power_esmi_Pos\")\n  |> filter(fn: (r) => r._value > 0) // Nur positive Werte\n  |> group(columns: [\"_measurement\", \"_field\"]) // Gruppiert über Schlüssel-Tags\n  |> integral(unit: 1h) // Integration in Wattstunden\n`;\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 480,
+        "wires": [
+            [
+                "940eb33ad95d0042",
+                "d51a843884b153a1"
+            ]
+        ]
+    },
+    {
+        "id": "056b7512ea9d6a4c",
+        "type": "complete",
+        "z": "eab31726a59d0393",
+        "name": "",
+        "scope": [
+            "3"
+        ],
+        "uncaught": false,
+        "x": 130,
+        "y": 140,
+        "wires": [
+            [
+                "3bff46653a7e901f"
+            ]
+        ]
+    },
+    {
+        "id": "31576e2db8dab983",
+        "type": "debug",
+        "z": "eab31726a59d0393",
+        "name": "debug 20",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1160,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "a1517f4661df2d5f",
+        "type": "debug",
+        "z": "eab31726a59d0393",
+        "name": "debug 22",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1180,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "a100970ceceda4bf",
+        "type": "inject",
+        "z": "eab31726a59d0393",
+        "name": "Alle 30s starten",
+        "props": [],
+        "repeat": "10",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 190,
+        "y": 660,
+        "wires": [
+            [
+                "3cdf836fdd0304ba"
+            ]
+        ],
+        "icon": "font-awesome/fa-paper-plane"
+    },
+    {
+        "id": "3cdf836fdd0304ba",
+        "type": "function",
+        "z": "eab31726a59d0393",
+        "name": "Zeitraum setzen",
+        "func": "// Aktuelle Zeit\nlet now = new Date();\n\n// Letzte Ausführungszeit aus dem Kontextspeicher abrufen\nlet lastRun = flow.get('lastRunEnergyHof', 'file') || new Date(now.getTime() - 5 * 60 * 1000000000); // Standard: 5 Minuten zurück\n\n// Zeit in ISO-Format konvertieren\nlet nowISO = now.toISOString();\nlet lastRunISO = new Date(lastRun).toISOString();\n\n// Speichere die aktuelle Zeit als letzte Ausführungszeit\n//flow.set('lastRun', now, 'file');\n\n// Übergabe der Zeitdaten\nmsg.payload = {\n    start: lastRunISO, // Startzeit der Abfrage\n    stop: nowISO       // Endzeit der Abfrage\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 660,
+        "wires": [
+            [
+                "f1767dd637e1589f",
+                "3fb2328a69deb7c1"
+            ]
+        ]
+    },
+    {
+        "id": "f1767dd637e1589f",
+        "type": "function",
+        "z": "eab31726a59d0393",
+        "name": "Flux-Abfrage erstellen",
+        "func": "// Daten für die Abfrage aus msg.payload\nlet start = msg.payload.start;\nlet stop = msg.payload.stop;\n\n// Flux-Abfrage generieren\nmsg.query = `from(bucket: \"5years\")\n  |> range(start: ${start}, stop: ${stop})\n  |> filter(fn: (r) => r[\"_measurement\"] == \"shellypro3em-EsMi\")\n  |> filter(fn: (r) => r[\"_field\"] == \"a_act_power\" or r[\"_field\"] == \"b_act_power\" or r[\"_field\"] == \"c_act_power\")\n  |> aggregateWindow(every: inf, fn: mean, createEmpty: false) // Mittelwert über das gesamte Zeitfenster\n  |> yield(name: \"mean\")`;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 710,
+        "y": 660,
+        "wires": [
+            [
+                "98754bf9d578af05",
+                "addbc2f4ccf343fb"
+            ]
+        ]
+    },
+    {
+        "id": "addbc2f4ccf343fb",
+        "type": "debug",
+        "z": "eab31726a59d0393",
+        "name": "debug 23",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "query",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 940,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "acc425809294e08d",
+        "type": "function",
+        "z": "eab31726a59d0393",
+        "name": "Saldo berechnen",
+        "func": "// Summiere die Leistung über alle Phasen (Mittelwert in Watt)\nlet results = msg.payload;\n\n// Positive und negative Salden getrennt berechnen\nlet saldo = 0;\nlet positiveSaldo = 0;\nlet negativeSaldo = 0;\n\nresults.forEach(row => {\n        saldo += row._value;\n});\n\nif (saldo > 0) {\n    positiveSaldo += saldo;\n} else {\n    negativeSaldo += saldo;\n}\n\n\n\n// Berechne die Zeitspanne in Stunden\nlet now = new Date();\nlet lastRun = flow.get('lastRunEnergyHof', 'file') || now;\n\nif (!(lastRun instanceof Date)) {\n    lastRun = new Date(lastRun);\n}\n\nlet timeDifference = (now.getTime() - lastRun.getTime()) / (1000 * 60 * 60);\n\n// Arbeit (kWh) für positive und negative Salden berechnen\nlet positiveEnergy = positiveSaldo * timeDifference / 1000;\nlet negativeEnergy = negativeSaldo * timeDifference / 1000;\n\n// Kumulierte Arbeit abrufen und aktualisieren\nlet cumulativePositiveEnergyHaus = flow.get('cumulativePositiveEnergyHaus', 'file') || 0;\nlet cumulativeNegativeEnergyHaus = flow.get('cumulativeNegativeEnergyHaus', 'file') || 0;\n\ncumulativePositiveEnergyHaus += positiveEnergy;\ncumulativeNegativeEnergyHaus += negativeEnergy;\n\n// Überschreiben bei bedarf\n//cumulativePositiveEnergyHaus = 120;\n//cumulativeNegativeEnergyHaus = -(18.5);\n\n// Speichere die neuen kumulierten Werte im Kontextspeicher\nflow.set('cumulativePositiveEnergyHaus', cumulativePositiveEnergyHaus, 'file');\nflow.set('cumulativeNegativeEnergyHaus', cumulativeNegativeEnergyHaus, 'file');\nflow.set('lastRunEnergyHof', now, 'file');\n\n\nglobal.set('cumulativePositiveEnergyHaus', cumulativePositiveEnergyHaus, 'file');\nglobal.set('cumulativeNegativeEnergyHaus', cumulativeNegativeEnergyHaus, 'file');\nglobal.set('lastRunEnergyHof', now, 'file');\n// Ergebnis vorbereiten\nmsg.payload = [\n    {\n        measurement: \"saldierterStrom\",\n        fields: {\n            //positiveSaldo: positiveSaldo,\n            //negativeSaldo: negativeSaldo,\n            //positiveEnergy: positiveEnergy,\n            //negativeEnergy: negativeEnergy,\n            cumulativePositiveEnergyHaus: cumulativePositiveEnergyHaus,\n            cumulativeNegativeEnergyHaus: -cumulativeNegativeEnergyHaus,\n            //timeDifference: timeDifference\n        },\n        tags: {\n            source: \"shellypro3em-EsMi\"\n        }\n    }\n];\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 970,
+        "y": 580,
+        "wires": [
+            [
+                "e941456df6d07dfe",
+                "a1517f4661df2d5f"
+            ]
+        ]
+    },
+    {
+        "id": "3fb2328a69deb7c1",
+        "type": "debug",
+        "z": "eab31726a59d0393",
+        "name": "debug 8",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 680,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "9163cc3db255d094",
+        "type": "complete",
+        "z": "eab31726a59d0393",
+        "name": "",
+        "scope": [
+            "eb129ab87e7dea0e"
+        ],
+        "uncaught": false,
+        "x": 130,
+        "y": 480,
+        "wires": [
+            [
+                "0da97fa00170bf60"
+            ]
+        ]
+    },
+    {
+        "id": "55489d903fa41cb9",
+        "type": "complete",
+        "z": "eab31726a59d0393",
+        "name": "",
+        "scope": [
+            "d675f0e6f0d5a483"
+        ],
+        "uncaught": false,
+        "x": 130,
+        "y": 320,
+        "wires": [
+            [
+                "cb372be8101b48b8"
+            ]
+        ]
+    },
+    {
+        "id": "d5f638771cd2ceef",
+        "type": "influxdb batch",
+        "z": "eab31726a59d0393",
+        "influxdb": "dfeb17a634674929",
+        "precision": "",
+        "retentionPolicy": "",
+        "name": "Influx",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "esmi.tech",
+        "bucket": "5years",
+        "x": 1130,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "2e204cbf314b1fc1",
+        "type": "influxdb batch",
+        "z": "eab31726a59d0393",
+        "influxdb": "dfeb17a634674929",
+        "precision": "",
+        "retentionPolicy": "",
+        "name": "Influx",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "esmi.tech",
+        "bucket": "5years",
+        "x": 1170,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "706374f0fc2c8b8a",
+        "type": "influxdb batch",
+        "z": "eab31726a59d0393",
+        "influxdb": "dfeb17a634674929",
+        "precision": "",
+        "retentionPolicy": "",
+        "name": "Influx",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "esmi.tech",
+        "bucket": "5years",
+        "x": 1130,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "e941456df6d07dfe",
+        "type": "influxdb batch",
+        "z": "eab31726a59d0393",
+        "influxdb": "dfeb17a634674929",
+        "precision": "",
+        "retentionPolicy": "",
+        "name": "Influx",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "esmi.tech",
+        "bucket": "5years",
+        "x": 1190,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "e9a18d715d104f2e",
+        "type": "influxdb in",
+        "z": "eab31726a59d0393",
+        "influxdb": "dfeb17a634674929",
+        "name": "",
+        "query": "from(bucket: \"5years\")\n  |> range(start: today())\n  |> filter(fn: (r) => r[\"_measurement\"] == \"shellypro3em-EsMi\")\n  |> filter(fn: (r) => r[\"_field\"] == \"sum_act_power_esmi_Pos\")\n  |> filter(fn: (r) => r._value > 0) // Strombezug: positive Werte\n  |> group(columns: [\"_measurement\", \"_field\"]) // Gruppiert über Schlüssel-Tags\n  |> integral(unit: 1h) // Integration der Leistung über die Zeit in Stunden",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "esmi.tech",
+        "x": 410,
+        "y": 60,
+        "wires": [
+            [
+                "2ac44d9180b9ecbd",
+                "3"
+            ]
+        ]
+    },
+    {
+        "id": "3bff46653a7e901f",
+        "type": "influxdb in",
+        "z": "eab31726a59d0393",
+        "influxdb": "dfeb17a634674929",
+        "name": "",
+        "query": "from(bucket: \"5years\")\n  |> range(start: today())\n  |> filter(fn: (r) => r[\"_measurement\"] == \"shellypro3em-EsMi\")\n  |> filter(fn: (r) => r[\"_field\"] == \"sum_act_power_esmi_Neg\")\n  |> filter(fn: (r) => r._value < 0) // Stromeinspeisung: negative Werte\n  |> group(columns: [\"_measurement\", \"_field\"]) // Gruppiert über Schlüssel-Tags\n  |> integral(unit: 1h) // Integration der Leistung über die Zeit in Stunden",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "esmi.tech",
+        "x": 410,
+        "y": 140,
+        "wires": [
+            [
+                "e92af15caa791b56",
+                "2ac44d9180b9ecbd"
+            ]
+        ]
+    },
+    {
+        "id": "15270e22b73ab1b3",
+        "type": "influxdb in",
+        "z": "eab31726a59d0393",
+        "influxdb": "dfeb17a634674929",
+        "name": "",
+        "query": "",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "esmi.tech",
+        "x": 590,
+        "y": 240,
+        "wires": [
+            [
+                "d675f0e6f0d5a483",
+                "7c5a5bb1405956eb"
+            ]
+        ]
+    },
+    {
+        "id": "9ac2b64b1138ac85",
+        "type": "influxdb in",
+        "z": "eab31726a59d0393",
+        "influxdb": "dfeb17a634674929",
+        "name": "",
+        "query": "",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "esmi.tech",
+        "x": 590,
+        "y": 320,
+        "wires": [
+            [
+                "422f558d415746fc",
+                "7c5a5bb1405956eb"
+            ]
+        ]
+    },
+    {
+        "id": "6e8b2ad63ffdef16",
+        "type": "influxdb in",
+        "z": "eab31726a59d0393",
+        "influxdb": "dfeb17a634674929",
+        "name": "",
+        "query": "",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "esmi.tech",
+        "x": 590,
+        "y": 400,
+        "wires": [
+            [
+                "eb129ab87e7dea0e",
+                "44d567df3f1671e9"
+            ]
+        ]
+    },
+    {
+        "id": "940eb33ad95d0042",
+        "type": "influxdb in",
+        "z": "eab31726a59d0393",
+        "influxdb": "dfeb17a634674929",
+        "name": "",
+        "query": "",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "esmi.tech",
+        "x": 590,
+        "y": 480,
+        "wires": [
+            [
+                "e1a05dcd90269163",
+                "44d567df3f1671e9"
+            ]
+        ]
+    },
+    {
+        "id": "98754bf9d578af05",
+        "type": "influxdb in",
+        "z": "eab31726a59d0393",
+        "influxdb": "dfeb17a634674929",
+        "name": "InfluxDB lesen",
+        "query": "",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "esmi.tech",
+        "x": 960,
+        "y": 660,
+        "wires": [
+            [
+                "31576e2db8dab983",
+                "acc425809294e08d"
+            ]
+        ]
+    },
+    {
+        "id": "dfeb17a634674929",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": "8086",
+        "protocol": "http",
+        "database": "database",
+        "name": "",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://127.0.0.1:8086",
+        "timeout": "10",
+        "rejectUnauthorized": true
+    }
+]
